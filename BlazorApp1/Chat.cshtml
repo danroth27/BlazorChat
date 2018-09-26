@@ -1,0 +1,45 @@
+﻿@using Blazor.Extensions;
+
+<h1>Chat</h1>
+
+<form action="#" onsubmit="@SendAsync">
+    Say something:
+    <input bind="@message" disabled="@disabled" />
+    <button disabled="@disabled">Send</button>
+</form>
+
+<ul>
+    @foreach (var message in messages)
+    {
+        <li>@message</li>
+    }
+</ul>
+
+@functions {
+string message;
+IList<string> messages = new List<string>();
+bool disabled = true;
+HubConnection connection;
+
+protected override async Task OnInitAsync()
+{
+    connection = new HubConnectionBuilder().WithUrl("/hubs/chat").Build();
+    connection.On<string>("SendAction", this.OnMessage);
+    connection.On<string>("SendMessage", this.OnMessage);
+    await connection.StartAsync();
+    disabled = false;
+}
+
+Task OnMessage(string message)
+{
+    messages.Add(message);
+    StateHasChanged();
+    return Task.CompletedTask;
+}
+
+async Task SendAsync()
+{
+    await connection.InvokeAsync("Send", message);
+    message = "";
+}
+}
