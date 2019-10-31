@@ -1,0 +1,52 @@
+﻿@using Blazor.Extensions
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@using Microsoft.AspNetCore.Components.Web   @* See https://devblogs.microsoft.com/aspnet/asp-net-core-and-blazor-updates-in-net-core-3-0-preview-9/ *@
+
+@inject IJSRuntime  jsRuntime
+<h1>Chat</h1>
+
+
+<div>
+    Say something:
+    <input @bind="message" disabled="@disabled" />
+    <button disabled="@disabled" @onclick="SendAsync" >
+        Send
+    </button>
+</div>
+
+<ul>
+    @foreach (var message in messages)
+    {
+        <li>@message</li>
+    }
+</ul>
+
+@code  {
+    string message;
+    IList<string> messages = new List<string>();
+    bool disabled = true;
+    HubConnection connection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        connection = new Blazor.Extensions.HubConnectionBuilder(jsRuntime).WithUrl("/hubs/chat").Build();
+        connection.On<string>("SendAction", this.OnMessage);
+        connection.On<string>("SendMessage", this.OnMessage);
+        await connection.StartAsync();
+        disabled = false;
+    }
+
+    Task OnMessage(string message)
+    {
+        messages.Add(message);
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    async Task SendAsync()
+    {
+        await connection.InvokeAsync("Send", message);
+        message = "";
+    }
+}
