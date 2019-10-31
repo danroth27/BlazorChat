@@ -1,7 +1,7 @@
 ﻿@using Blazor.Extensions
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.JSInterop
-@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web   @* See https://devblogs.microsoft.com/aspnet/asp-net-core-and-blazor-updates-in-net-core-3-0-preview-9/ *@
 
 @inject IJSRuntime  jsRuntime
 <h1>Chat</h1>
@@ -10,7 +10,6 @@
 <div>
     Say something:
     <input @bind="message" disabled="@disabled" />
-    @*<button disabled="@disabled" @onclick="SendAsync">*@
     <button disabled="@disabled" @onclick="SendAsync" >
         Send
     </button>
